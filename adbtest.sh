@@ -159,7 +159,6 @@ do_log(){
     /data/system/dropbox                        \n
     /data/tombstones                            \n
     /data/vendor/kmsgd                          \n
-    /data/vendor/kmsgd                          \n
     /resources/mtklog                           \n
     /sdcard/btsnoop_hci.log                     \n
     /sdcard/LOG                                 \n
@@ -179,8 +178,8 @@ do_log(){
     /sdcard/tencent/wecarspeech/data/dingdang   \n
     # 202微信                                   \n
     /storage/emulated/0/tencent                 \n
-    /storage/emulated/0/tencent/autowechat      \n
-    /storage/emulated/0/tencent/MicroMsg/xlog   \n
+#    /storage/emulated/0/tencent/autowechat      \n
+#    /storage/emulated/0/tencent/MicroMsg/xlog   \n
     "
     # for every devices
     for device in ${devices_list}
@@ -197,7 +196,7 @@ do_log(){
         report_file="${project}_${module_name}_report_"`date +%Y%m%d%H%M%S`".txt"
         # start test
         log_folder=`pwd`"/log/${project}_"`date +%Y%m%d%H%M%S`
-        log_folder=`pwd`"/log/${project}_"`date +%H%M%S`
+        #log_folder=`pwd`"/log/${project}_"`date +%H%M%S`
         mkdir -p ${log_folder}
         echo "请检查以下日志，是否复制了您需要的日志文件或日志文件夹，若没有，请将您需要复制的文件路径写入${conf_file}中。若是失败警告，则说明车机里边没有这个日志文件，请检查车机。" >> "${log_folder}/${script_log}"
         echo "==============================================================================" >> "${log_folder}/${script_log}"        
@@ -207,9 +206,12 @@ do_log(){
             to_file=${file////_}
         	# short_to_file=`echo ${to_file} | cut -d '_' -f 1,2 `
         	short_to_file=`echo ${to_file} | awk -F'_' '{print $(NF-1)"_"$NF}'`
+            echo "" >> "${log_folder}/${script_log}"
             if [ `adb shell "if [ -d ${file} ]; then echo 1; fi"` ]; then
                 adb -s ${device} pull "/${file}/." "${log_folder}/${short_to_file}"
                 echo "【完成复制】${file} 文件夹到 ${log_folder}/${short_to_file}" | tee -a "${log_folder}/${script_log}"
+                echo "车机:/${file}/.中有如下文件" >> "${log_folder}/${script_log}"
+                adb -s ${device} shell "find /${file}/. -type f " >> "${log_folder}/${script_log}"
             elif [ `adb shell "if [ -f ${file} ]; then echo 1; fi"` ]; then
                 adb -s ${device} pull "/${file}" "${log_folder}/${short_to_file}"
                 echo "【完成复制】${file} 文件到 ${short_to_file}" | tee -a "${log_folder}/${script_log}"
@@ -790,7 +792,7 @@ do_kill(){
 
 # device_save_path="//mnt/sdcard/"
 device_save_path="/data/local/tmp/"
-echo "请将脚本放在英文路径下运行"
+echo "请将脚本放到D盘/E盘非空格英文目录下运行。目录路径尽量短。以防止log路径过长抓不全。"
 read -p "请输入设备${device}项目名称:" project
 while true
 do
